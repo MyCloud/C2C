@@ -30,6 +30,8 @@ public class Manager {
 	private int port;
 	private String conference;
 	private String nickname;
+	private String user;
+	private String room;
 	
 	private ConnectionConfiguration config;
 	private XMPPConnection connection;
@@ -66,19 +68,22 @@ public class Manager {
 		
 	}
 	
-	public void performLogin(String nickname, String password ) throws XMPPException {
+	public void performLogin(String user, String password ) throws XMPPException {
 		if (connection!=null && connection.isConnected()) {
-			connection.login(nickname, password);
-			this.nickname = nickname;
+			connection.login(user, password);
+			this.user = user;
 		}
 	}
 
-	public void performJoinRoom(String username, String room ) throws XMPPException {
+	public void performJoinRoom(String nickname, String room ) throws XMPPException {
 		if (connection!=null && connection.isConnected()) {
-			MultiUserChat muc = new MultiUserChat(connection, room + "@" + conference + "." + server );	
+			this.room = room + "@" + conference + "." + server;
+			muc = new MultiUserChat(connection, this.room  );	
 			// join the conference
-			muc.join("username");
-			muc.addMessageListener( new newMsgListener() );
+			muc.join( nickname );
+			muc.addMessageListener( new newMsgListener( this.room, nickname ) );
+//			this.room = this.room + "/" + nickname;
+			this.nickname = nickname;
 			
 		}
 	}
@@ -116,8 +121,9 @@ public class Manager {
 	
 	public void sendMessage(String message, String buddyJID) throws XMPPException {
 		System.out.println(String.format("Sending mesage '%1$s' to room %2$s", message, conference));
-		Chat chat = chatManager.createChat(buddyJID, messageListener);
-		 chat.sendMessage(message);
+		if (muc!= null && muc.isJoined() ) {
+			muc.sendMessage(message);
+		}
 		//muc.sendMessage(message);
 	}
 	
@@ -140,18 +146,25 @@ public class Manager {
 	}
 	
 	final class newMsgListener implements PacketListener {
+		
+		private String MyFrom;
+		
+		public newMsgListener( String room, String nickname ) {
+			this.MyFrom = room + "/" + nickname;
+		}
+
 		public void processPacket(Packet packet) {
-			if (packet.getFrom().equals(nickname)) {
+			if (packet.getFrom().equals(MyFrom)) {
 				return; // we don't wont to echo own messages
 			}
-			System.out.println("PF: " + packet.getClass().getName());
+			System.out.println("PF: " + packet.getClass().getName() + "getfrom:" + packet.getFrom() );
 
 			if ("org.jivesoftware.smack.packet.Message" == packet.getClass()
 					.getName()) {
 				String from = packet.getFrom();
-				System.out.println("PF: " + packet.getClass().getName());
 				Message m = (Message) packet;
 				String body = m.getBody();
+				from = m.getFrom();
 				System.out.println(String.format(
 						"Received message '%1$s' from %2$s", body, from));
 
