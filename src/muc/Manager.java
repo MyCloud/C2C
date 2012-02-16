@@ -36,10 +36,7 @@ public class Manager {
 	private ConnectionConfiguration config;
 	private XMPPConnection connection;
 	private MultiUserChat muc;
-	
-	private ChatManager chatManager;
-	private MessageListener messageListener;
-	
+		
 	public Manager(String server, String conference ) {
 		this.server = server;
 		this.port = 5222;
@@ -63,8 +60,8 @@ public class Manager {
 		
 		System.out.println("Connected: " + connection.isConnected());
 		
-		chatManager = connection.getChatManager();
-		messageListener = new MyMessageListener();
+		//chatManager = connection.getChatManager();
+		//messageListener = new MyMessageListener();
 		
 	}
 	
@@ -145,32 +142,5 @@ public class Manager {
 		
 	}
 	
-	final class newMsgListener implements PacketListener {
-		
-		private String MyFrom;
-		
-		public newMsgListener( String room, String nickname ) {
-			this.MyFrom = room + "/" + nickname;
-		}
-
-		public void processPacket(Packet packet) {
-			if (packet.getFrom().equals(MyFrom)) {
-				return; // we don't wont to echo own messages
-			}
-			System.out.println("PF: " + packet.getClass().getName() + "getfrom:" + packet.getFrom() );
-
-			if ("org.jivesoftware.smack.packet.Message" == packet.getClass()
-					.getName()) {
-				String from = packet.getFrom();
-				Message m = (Message) packet;
-				String body = m.getBody();
-				from = m.getFrom();
-				System.out.println(String.format(
-						"Received message '%1$s' from %2$s", body, from));
-
-			}
-
-		}
-	}
 
 }
