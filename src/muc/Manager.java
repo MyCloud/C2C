@@ -117,7 +117,8 @@ public class Manager {
 	public void sendMessage(String message, String buddyJID) throws XMPPException {
 		System.out.println(String.format("Sending mesage '%1$s' to room %2$s", message, conference));
 		Chat chat = chatManager.createChat(buddyJID, messageListener);
-		chat.sendMessage(message);
+		 chat.sendMessage(message);
+		//muc.sendMessage(message);
 	}
 	
 	public void createEntry(String user, String name) throws Exception {
