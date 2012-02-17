@@ -23,7 +23,6 @@ public class Manager {
 	private String server;
 	private int port;
 	private String conference;
-	private String nickname;
 	private String user;
 	private String room;
 	
@@ -72,9 +71,11 @@ public class Manager {
 			muc = new MultiUserChat(connection, this.room  );	
 			// join the conference
 			muc.join( nickname );
-			muc.addMessageListener( new newMsgListener( this.room, nickname ) );
+			muc.addMessageListener( new c2clistener(this.room, nickname));
+			//muc.addMessageListener( new newMsgListener( this.room, nickname ) );
+			muc.addUserStatusListener(new newEventListener(this));
 //			this.room = this.room + "/" + nickname;
-			this.nickname = nickname;
+			//this.nickname = nickname;
 			
 		}
 	}
